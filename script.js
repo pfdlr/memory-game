@@ -3,8 +3,9 @@
 const settings = {
     blockNumbers: 20,
     rowNumbers: 5,
-    gameBoard: null,
-    gameScore: null,
+    gameBoard: document.querySelector('.game-board'),
+    scoreBoard: document.querySelector('.game-moves'),
+    clock: document.querySelector(".game-time"),
     blocks: [],
     checkedBloks: [],
     moves: 0,
@@ -36,7 +37,7 @@ const settings = {
     canGet: true, //czy można klikać na kafelki
     tilePairs: 0,
 }
-let { blockNumbers, rowNumbers, gameBoard, gameScore, blocks, checkedBloks, moves, blockImages, canGet, tilePairs } = settings;
+let { blockNumbers, rowNumbers, gameBoard, scoreBoard, blocks, checkedBloks, moves, blockImages, canGet, tilePairs, clock } = settings;
 
 
 /* randomizuje elementy w tablicy blockImages */
@@ -48,13 +49,18 @@ function shuffle(a) {
     return a;
 }
 
+
+
 function startGame() {
     //console.log(blocks, blockNumbers, checkedBloks, moves, blockImages);
-    gameBoard = document.querySelector('.game-board');
+    //gameBoard = document.querySelector('.game-board');
     gameBoard.innerHTML = '';
+    gameBoard.style.backgroundImage = 'none';
+    startBtn.innerText = "RESTART";
+    //scoreBoard = document.querySelector('.game-moves');
+    scoreBoard.innerHTML = '0';
+    resetTimer();
 
-    scoreBoard = document.querySelector('.game-score');
-    scoreBoard.innerHTML = '';
 
     blocks = [];
     checkedBloks = [];
@@ -90,6 +96,8 @@ function startGame() {
         tile.addEventListener("click", this.tileClick.bind(this));
     }
 
+    startTimer();
+
 }
 
 function tileClick(e) {
@@ -106,9 +114,9 @@ function tileClick(e) {
             canGet = false;
 
             if (checkedBloks[0].dataset.cardType === checkedBloks[1].dataset.cardType) {
-                setTimeout(deleteTiles.bind(this), 1000);
+                setTimeout(deleteTiles.bind(this), 500);
             } else {
-                setTimeout(resetTiles.bind(this), 1000);
+                setTimeout(resetTiles.bind(this), 500);
             }
 
             moves++;
@@ -126,7 +134,15 @@ function deleteTiles() {
 
     tilePairs++;
     if (tilePairs >= blockNumbers / 2) {
-        alert("Udało ci się odgadnąć wszystkie obrazki");
+        stopTimer()
+        openModal()
+        timeDisplay.innerText = time;
+        movesDisplay.innerText = moves;
+        //alert(`Udało ci się odgadnąć wszystkie obrazki \n w czasie: ${minutes.innerText}:${seconds.innerText}`);
+        resetTimer();
+        scoreBoard.innerText = '';
+        //startBtn.disabled = false;
+        startBtn.innerText = "START";
     }
 }
 
@@ -140,8 +156,89 @@ function resetTiles() {
 
 
 
-
+const startBtn = document.getElementById('start-game');
 document.addEventListener('DOMContentLoaded', function () {
-    const startBtn = document.getElementById('start-game');
+
     startBtn.addEventListener('click', () => startGame());
 });
+
+/* _____________ STOPWATCH __________ */
+
+// Set up the app once the DOM is loaded
+//window.addEventListener("DOMContentLoaded", setupStopwatch);
+
+
+//let clock = document.querySelector(".game-time");
+
+
+const minutes = document.querySelector('.minutes');
+const seconds = document.querySelector('.seconds');
+let timerTime = 00;
+let isRunning = false;
+let interval;
+let time;
+
+
+function startTimer() {
+    if (isRunning) return;
+
+
+    isRunning = true;
+    interval = setInterval(incrementTimer, 1000);
+}
+
+function stopTimer() {
+    if (!isRunning) return;
+
+    isRunning = false;
+    clearInterval(interval);
+}
+
+function resetTimer() {
+    stopTimer();
+
+    timerTime = 0;
+    minutes.innerText = '00';
+    seconds.innerText = '00';
+}
+
+function incrementTimer() {
+    timerTime++;
+
+    const numOfMinutes = Math.floor(timerTime / 60);
+    const numOfSeconds = timerTime % 60;
+
+    minutes.innerText = pad(numOfMinutes);
+    seconds.innerText = pad(numOfSeconds);
+    time = `${pad(numOfMinutes)}:${pad(numOfSeconds)}`;
+
+}
+
+
+function pad(number) {
+    return (number < 10) ? '0' + number : number;
+}
+
+//MODAL
+
+const overlay = document.getElementById("modalOverlay");
+const modal = document.getElementById("finishModal");
+const closeButton = document.getElementById("closeButton");
+const timeDisplay = document.querySelector(".game-summary-time-display");
+const movesDisplay = document.querySelector(".game-summary-moves-display");
+
+
+closeButton.addEventListener("click", closeModal);
+
+function openModal() {
+    overlay.style.display = "block";
+    modal.style.display = "flex";
+}
+
+function closeModal() {
+    overlay.style.display = "none";
+    modal.style.display = "none";
+    gameBoard.style.backgroundImage = 'url(./imgs/PPN_kolor.png)';
+    gameBoard.style.backgroundRepeat = 'no-repeat';
+}
+

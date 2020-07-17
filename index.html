@@ -1,18 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style.css">
     <title>Loga polskich parków narodowych </title>
 </head>
-<body>
- <div class="game-container">
-     <div class="game-board"></div>
-     <div class="game-score"></div>
-     <button id="start-game" class="game-start-button">START</button>
- </div>
 
-<script type="text/javascript" src="./script.js"></script>
+<body>
+    <header class="header">
+        <h1>Gra MEMO - Loga polskich parków narodowych</h1>
+    </header>
+    <section class="game-container">
+        <div class="game-board"></div>
+        <div class="game-inicators">
+            <div class="game-score">Liczba ruchów: <span class="game-moves"></span></div>
+            <div class="game-stopwatch">Czas gry: <span class="minutes">00</span>:<span class="seconds">00</span></div>
+        </div>
+        <button id="start-game" class="game-start-button">START</button>
+
+        <div class="overlay" id="modalOverlay">
+            <div id="finishModal" class="modal">
+                <header>! Brawo !</header>
+                <p class="game-summary">Udało Ci się odnaleźć wszystkie loga parków</p>
+                <p class="game-summary-moves">Liczba ruchów: <span class="game-summary-moves-display"></span></p>
+                <p class="game-summary-time">Czas gry: <span class="game-summary-time-display"></span></p>
+
+                <button id="closeButton" class="close-button">Zamknij</button>
+            </div>
+        </div>
+
+    </section>
+
+    <script type="text/javascript" src="./script.min.js"></script>
 </body>
+
 </html>
