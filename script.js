@@ -1,11 +1,15 @@
-/* 'use strict'; */
-
 const settings = {
     blockNumbers: 20,
     rowNumbers: 5,
     gameBoard: document.querySelector('.game-board'),
     scoreBoard: document.querySelector('.game-moves'),
     clock: document.querySelector(".game-time"),
+    startBtn: document.getElementById('start-game'),
+    overlay: document.getElementById("modalOverlay"),
+    modal: document.getElementById("finishModal"),
+    closeButton: document.getElementById("closeButton"),
+    timeDisplay: document.querySelector(".game-summary-time-display"),
+    movesDisplay: document.querySelector(".game-summary-moves-display"),
     blocks: [],
     checkedBloks: [],
     moves: 0,
@@ -37,8 +41,25 @@ const settings = {
     canGet: true, //czy można klikać na kafelki
     tilePairs: 0,
 }
-let { blockNumbers, rowNumbers, gameBoard, scoreBoard, blocks, checkedBloks, moves, blockImages, canGet, tilePairs, clock } = settings;
+let { blockNumbers,
+    rowNumbers,
+    gameBoard,
+    scoreBoard,
+    clock,
+    startBtn,
+    overlay,
+    modal,
+    closeButton,
+    timeDisplay,
+    movesDisplay,
+    blocks,
+    checkedBloks,
+    moves,
+    blockImages,
+    canGet,
+    tilePairs } = settings;
 
+startBtn.addEventListener('click', () => startGame());
 
 /* randomizuje elementy w tablicy blockImages */
 function shuffle(a) {
@@ -48,41 +69,24 @@ function shuffle(a) {
     }
     return a;
 }
-
-
-
-function startGame() {
-    //console.log(blocks, blockNumbers, checkedBloks, moves, blockImages);
-    //gameBoard = document.querySelector('.game-board');
-    gameBoard.innerHTML = '';
-    gameBoard.style.backgroundImage = 'none';
-    startBtn.innerText = "RESTART";
-    //scoreBoard = document.querySelector('.game-moves');
-    scoreBoard.innerHTML = '0';
-    resetTimer();
-
-
-    blocks = [];
-    checkedBloks = [];
-    moves = 0;
-    canGet = true;
-    tilePairs = 0;
-
-    shuffle(blockImages);
-
-    //generujemy tablicę numerów kocków (parami)
+//generuje tablicę numerów kocków (parami)
+function generatePairNumbers() {
     for (let i = 0; i < blockNumbers; i++) {
         blocks.push(Math.floor(i / 2));
     }
-
-    //i ją mieszamy
+}
+// miesza pary numerów
+function mixNumbers() {
     for (let i = blockNumbers - 1; i > 0; i--) {
         const swap = Math.floor(Math.random() * i);
         const tmp = blocks[i];
         blocks[i] = blocks[swap];
         blocks[swap] = tmp;
     }
+}
 
+//generuje tablicę obrazków
+function generateImagesTable() {
     for (let i = 0; i < blockNumbers; i++) {
         const tile = document.createElement("div");
         tile.classList.add("game-tile");
@@ -95,30 +99,42 @@ function startGame() {
 
         tile.addEventListener("click", this.tileClick.bind(this));
     }
+}
 
+function startGame() {
+    gameBoard.innerHTML = '';
+    gameBoard.style.backgroundImage = 'none';
+    startBtn.innerText = "RESTART";
+    scoreBoard.innerHTML = '0';
+
+    resetTimer();
+
+    blocks = [];
+    checkedBloks = [];
+    moves = 0;
+    canGet = true;
+    tilePairs = 0;
+
+    shuffle(blockImages);
+    generatePairNumbers(blockNumbers);
+    mixNumbers(blockNumbers);
+    generateImagesTable(blockNumbers);
     startTimer();
-
 }
 
 function tileClick(e) {
-    //console.log(blockImages)
     if (canGet) {
-        //jeżeli jeszcze nie pobraliśmy 1 elementu
-        //lub jeżeli index tego elementu nie istnieje w pobranych...
         if (!checkedBloks[0] || (checkedBloks[0].dataset.index !== e.target.dataset.index)) {
             checkedBloks.push(e.target);
             e.target.style.backgroundImage = "url(./imgs/" + blockImages[e.target.dataset.cardType] + ")";
         }
-
         if (checkedBloks.length === 2) {
             canGet = false;
-
             if (checkedBloks[0].dataset.cardType === checkedBloks[1].dataset.cardType) {
                 setTimeout(deleteTiles.bind(this), 500);
             } else {
                 setTimeout(resetTiles.bind(this), 500);
             }
-
             moves++;
             scoreBoard.innerText = moves;
         }
@@ -138,11 +154,6 @@ function deleteTiles() {
         openModal()
         timeDisplay.innerText = time;
         movesDisplay.innerText = moves;
-        //alert(`Udało ci się odgadnąć wszystkie obrazki \n w czasie: ${minutes.innerText}:${seconds.innerText}`);
-        resetTimer();
-        scoreBoard.innerText = '';
-        //startBtn.disabled = false;
-        startBtn.innerText = "START";
     }
 }
 
@@ -154,23 +165,7 @@ function resetTiles() {
     canGet = true;
 }
 
-
-
-const startBtn = document.getElementById('start-game');
-document.addEventListener('DOMContentLoaded', function () {
-
-    startBtn.addEventListener('click', () => startGame());
-});
-
 /* _____________ STOPWATCH __________ */
-
-// Set up the app once the DOM is loaded
-//window.addEventListener("DOMContentLoaded", setupStopwatch);
-
-
-//let clock = document.querySelector(".game-time");
-
-
 const minutes = document.querySelector('.minutes');
 const seconds = document.querySelector('.seconds');
 let timerTime = 00;
@@ -178,25 +173,20 @@ let isRunning = false;
 let interval;
 let time;
 
-
 function startTimer() {
     if (isRunning) return;
-
-
     isRunning = true;
     interval = setInterval(incrementTimer, 1000);
 }
 
 function stopTimer() {
     if (!isRunning) return;
-
     isRunning = false;
     clearInterval(interval);
 }
 
 function resetTimer() {
     stopTimer();
-
     timerTime = 0;
     minutes.innerText = '00';
     seconds.innerText = '00';
@@ -211,23 +201,13 @@ function incrementTimer() {
     minutes.innerText = pad(numOfMinutes);
     seconds.innerText = pad(numOfSeconds);
     time = `${pad(numOfMinutes)}:${pad(numOfSeconds)}`;
-
 }
-
 
 function pad(number) {
     return (number < 10) ? '0' + number : number;
 }
 
-//MODAL
-
-const overlay = document.getElementById("modalOverlay");
-const modal = document.getElementById("finishModal");
-const closeButton = document.getElementById("closeButton");
-const timeDisplay = document.querySelector(".game-summary-time-display");
-const movesDisplay = document.querySelector(".game-summary-moves-display");
-
-
+/* _____________MODAL_________*/
 closeButton.addEventListener("click", closeModal);
 
 function openModal() {
@@ -240,5 +220,7 @@ function closeModal() {
     modal.style.display = "none";
     gameBoard.style.backgroundImage = 'url(./imgs/PPN_kolor.png)';
     gameBoard.style.backgroundRepeat = 'no-repeat';
+    scoreBoard.innerText = '';
+    startBtn.innerText = "START"
+    resetTimer();
 }
-
